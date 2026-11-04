@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrumen Penelitian</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: {
+                            light: '#E0F2FE',
+                            DEFAULT: '#38BDF8',
+                            dark: '#0284C7'
+                        },
+                        brandPurple: {
+                            light: '#F3E8FF',
+                            DEFAULT: '#C084FC',
+                            dark: '#9333EA'
+                        },
+                        brandCream: {
+                            light: '#FFFBEB',
+                            DEFAULT: '#FEF3C7',
+                            dark: '#FDE68A'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFBEB;
+        }
+        .prevent-select {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F3E8FF;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C084FC;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9333EA;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Top Navigation Header (Hidden in Exam Mode) -->
+    <header id="mainHeader" class="bg-gradient-to-r from-sky-100 via-purple-100 to-amber-100 border-b border-purple-200 sticky top-0 z-40 shadow-sm transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="navTo('home')">
+                <div class="p-2.5 bg-gradient-to-tr from-sky-500 to-purple-600 rounded-xl text-white shadow-md">
+                    <i class="fa-solid font-bold fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-sky-600 to-purple-700 bg-clip-text text-transparent">
+                        Instrumen Penelitian
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium">Sistem Evaluasi & Analisis Pembelajaran</p>
+                </div>
+            </div>
+            
+            <div id="headerRoleBadge" class="hidden sm:flex items-center gap-2">
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-white/80 border border-purple-200 text-purple-700 shadow-sm">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Mode Pengguna
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Wrapper -->
+    <main class="flex-grow flex flex-col justify-center p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-white border-l-4 p-4 rounded-xl shadow-2xl flex items-start space-x-3 pointer-events-none">
+            <div id="toastIcon" class="text-xl"></div>
+            <div class="flex-grow">
+                <h4 id="toastTitle" class="font-bold text-sm">Notifikasi</h4>
+                <p id="toastMessage" class="text-xs text-slate-600 mt-0.5"></p>
+            </div>
+        </div>
+
+        <!-- Custom Alert Modal -->
+        <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-purple-100 transform transition-all scale-95 opacity-0" id="customModalContent">
+                <div class="text-center">
+                    <div id="modalIconContainer" class="w-14 h-14 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mb-2">Konfirmasi</h3>
+                    <p id="modalMessage" class="text-sm text-slate-600 mb-6">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+                    <div class="flex justify-center space-x-3">
+                        <button id="modalBtnCancel" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Batal</button>
+                        <button id="modalBtnConfirm" class="px-4 py-2 bg-gradient-to-r from-sky-500 to-purple-600 hover:opacity-90 text-white text-sm font-semibold rounded-xl transition shadow-md">Ya, Lanjutkan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. HOME VIEW (ROLE SELECTION) -->
+        <section id="viewHome" class="w-full max-w-4xl mx-auto my-auto py-8">
+            <div class="text-center mb-10">
+                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-700 border border-purple-200">
+                    Sistem Evaluasi Digital
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mt-4 tracking-tight">
+                    Selamat Datang di Portal Evaluasi
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-2 max-w-xl mx-auto">
+                    Silakan pilih jenis akses sesuai peran Anda untuk melakukan tes instrumen atau pengelolaan data evaluasi.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+                <!-- Card Access Responden -->
+                <div onclick="navTo('studentLogin')" class="group bg-white/80 backdrop-blur-md rounded-3xl p-8 border-2 border-sky-100 hover:border-sky-400 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-sky-100 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-50"></div>
+                    <div class="w-20 h-20 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300 shadow-sm">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Akses Responden (Siswa)</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-6">
+                        Masuk untuk melakukan pengisian lembar evaluasi pilihan ganda dan essay sesuai dengan kode soal dari penguji.
+                    </p>
+                    <span class="mt-auto inline-flex items-center gap-2 px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs rounded-xl shadow-md transition-all">
+                        Mulai Mengerjakan <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                </div>
+
+                <!-- Card Access Admin -->
+                <div onclick="checkAdminAuthNav()" class="group bg-white/80 backdrop-blur-md rounded-3xl p-8 border-2 border-purple-100 hover:border-purple-400 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col items-center text-center relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-100 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-50"></div>
+                    <div class="w-20 h-20 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Akses Admin / Peneliti</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-6">
+                        Kelola instrumen pre-test, post-test kelas eksperimen/kontrol, analisis instrumen, dan rubrik penilaian.
+                    </p>
+                    <span class="mt-auto inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-md transition-all">
+                        Masuk Panel Admin <i class="fa-solid fa-lock"></i>
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. STUDENT LOGIN FORM VIEW -->
+        <section id="viewStudentLogin" class="hidden w-full max-w-md mx-auto my-auto py-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-sky-100">
+                <button onclick="navTo('home')" class="text-xs font-semibold text-slate-400 hover:text-slate-600 mb-4 inline-flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Utama
+                </button>
+                <div class="mb-6 text-center">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center text-xl mx-auto mb-3">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Identitas Responden</h3>
+                    <p class="text-xs text-slate-500 mt-1">Isi identitas untuk mengakses soal evaluasi</p>
+                </div>
+
+                <form id="formStudentAuth" onsubmit="event.preventDefault(); startStudentExam();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                        <input type="text" id="stdName" required placeholder="Contoh: Ahmad Dahlan" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kelas / Kelompok</label>
+                        <input type="text" id="stdClass" required placeholder="Contoh: X IPA 1" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kode Soal Instrumen</label>
+                        <input type="text" id="stdCode" required placeholder="Masukkan Kode Soal dari Guru/Admin" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 uppercase font-mono tracking-wider">
+                    </div>
+
+                    <!-- Petunjuk dari Admin Dynamic Box -->
+                    <div id="stdInstructionsBox" class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 hidden">
+                        <div class="font-bold flex items-center gap-1 mb-1 text-amber-800">
+                            <i class="fa-solid fa-circle-info"></i> Petunjuk Pengisian:
+                        </div>
+                        <p id="stdInstructionsText" class="text-amber-800 leading-relaxed"></p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-sky-500 to-purple-600 hover:opacity-95 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Mulai Mengerjakan Soal
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 3. STUDENT EXAM VIEW (FULLSCREEN LOCKDOWN) -->
+        <section id="viewStudentExam" class="hidden fixed inset-0 z-50 bg-amber-50/90 overflow-y-auto p-4 sm:p-8 flex flex-col">
+            <!-- Strict Exam Top Bar -->
+            <div class="max-w-4xl w-full mx-auto bg-white/90 backdrop-blur rounded-2xl p-4 shadow-md border border-purple-100 mb-6 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-20">
+                <div>
+                    <h3 id="examHeaderTitle" class="font-bold text-slate-800 text-base">Soal Instrumen Evaluation</h3>
+                    <p class="text-xs text-slate-500">Responden: <span id="examStdName" class="font-semibold text-purple-700"></span> (<span id="examStdClass"></span>)</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="examPageBadge" class="px-3 py-1 bg-purple-100 text-purple-700 font-bold text-xs rounded-full border border-purple-200">
+                        Bagian 1: Pilihan Ganda
+                    </span>
+                    <span class="text-xs px-2.5 py-1 bg-red-100 text-red-600 font-bold rounded-full animate-pulse border border-red-200">
+                        <i class="fa-solid fa-shield-halved"></i> Lock Mode Fullscreen
+                    </span>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div class="max-w-4xl w-full mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-10 flex-grow flex flex-col justify-between">
+                
+                <!-- PAGE 1: PILIHAN GANDA -->
+                <div id="examPagePG" class="space-y-8">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h4 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm">A</span>
+                            Soal Pilihan Ganda
+                        </h4>
+                        <p class="text-xs text-slate-500 mt-1">Pilihlah salah satu jawaban (A, B, C, D, atau E) yang paling tepat untuk setiap nomor.</p>
+                    </div>
+
+                    <div id="examPGList" class="space-y-8">
+                        <!-- Dynamic PG Questions -->
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end">
+                        <button onclick="goToExamEssayPage()" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center gap-2">
+                            Lanjut ke Soal Essay <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: ESSAY -->
+                <div id="examPageEssay" class="hidden space-y-8">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h4 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm">B</span>
+                            Soal Uraian / Essay
+                        </h4>
+                        <p class="text-xs text-slate-500 mt-1">Jawablah pertanyaan berikut dengan jelas, tepat, dan dapat dipertanggungjawabkan.</p>
+                    </div>
+
+                    <div id="examEssayList" class="space-y-8">
+                        <!-- Dynamic Essay Questions -->
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
+                        <button onclick="submitExamWithConfirmation()" class="px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-extrabold text-sm rounded-xl shadow-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Kirim Semua Jawaban
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. ADMIN AUTHENTICATION (REGISTER / LOGIN) -->
+        <section id="viewAdminAuth" class="hidden w-full max-w-md mx-auto my-auto py-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-purple-100">
+                <button onclick="navTo('home')" class="text-xs font-semibold text-slate-400 hover:text-slate-600 mb-4 inline-flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+                </button>
+
+                <!-- TAB HEADERS LOGIN / REGISTER -->
+                <div class="flex bg-purple-50 p-1 rounded-2xl mb-6 border border-purple-100">
+                    <button id="tabBtnLogin" onclick="switchAdminAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-xl transition bg-white text-purple-700 shadow-sm">
+                        Masuk Admin
+                    </button>
+                    <button id="tabBtnRegister" onclick="switchAdminAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-purple-700">
+                        Buat Akun Baru
+                    </button>
+                </div>
+
+                <!-- FORM LOGIN -->
+                <form id="formAdminLogin" onsubmit="event.preventDefault(); handleAdminLogin();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email Admin</label>
+                        <input type="email" id="loginEmail" required placeholder="admin@domain.com" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi</label>
+                        <input type="password" id="loginPass" required placeholder="••••••••" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Dashboard
+                    </button>
+                </form>
+
+                <!-- FORM REGISTER -->
+                <form id="formAdminRegister" onsubmit="event.preventDefault(); handleAdminRegister();" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Lengkap Admin</label>
+                        <input type="text" id="regName" required placeholder="Dr. Peneliti, M.Pd" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email Admin</label>
+                        <input type="email" id="regEmail" required placeholder="peneliti@domain.com" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Buat Kata Sandi Akses</label>
+                        <input type="password" id="regPass" required placeholder="Minimal 6 Karakter" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> Simpan Akun & Kembali
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 5. ADMIN DASHBOARD VIEW (MAIN MENU - 3 CHOICE) -->
+        <section id="viewAdminDashboard" class="hidden w-full max-w-5xl mx-auto py-6">
+            <!-- Admin Top Navigation Bar -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-purple-100 mb-6 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <h3 id="adminProfileName" class="font-bold text-slate-800 text-sm">Admin Peneliti</h3>
+                        <p id="adminProfileEmail" class="text-xs text-slate-400">email@admin.com</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="adminLogout()" class="px-3.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Panel Manajemen Instrumen</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Pilih kelas penelitian atau buka analisis komparasi akhir</p>
+            </div>
+
+            <!-- 3 Main Choices Card -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Kelas Eksperimen -->
+                <div class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border-2 border-sky-100 hover:border-sky-400 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-vial"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Kelas Eksperimen</h3>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                            Kelola instrumen pre-test, post-test, dan analisis perbandingan untuk kelas tindakan/eksperimen.
+                        </p>
+                    </div>
+                    <div class="mt-6">
+                        <button onclick="openClassManagement('experiment')" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-xl shadow transition">
+                            Buka Kelas Eksperimen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kelas Kontrol -->
+                <div class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border-2 border-purple-100 hover:border-purple-400 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Kelas Kontrol</h3>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                            Kelola tes instrumen untuk kelompok kontrol sebagai pembanding evaluasi pembelajaran.
+                        </p>
+                    </div>
+                    <div class="mt-6 space-y-2">
+                        <button onclick="openClassManagement('control')" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow transition">
+                            Buka Kelas Kontrol
+                        </button>
+                        <button onclick="copyExperimentToControl()" class="w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-copy"></i> Salin dari Eksperimen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analisis Akhir -->
+                <div class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border-2 border-amber-100 hover:border-amber-400 transition flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl mb-4">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Analisis Akhir</h3>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                            Perbandingan komprehensif antara Kelas Eksperimen dan Kelas Kontrol berupa grafik dan penjelasan naratif.
+                        </p>
+                    </div>
+                    <div class="mt-6">
+                        <button onclick="openFinalAnalysis()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-90 text-white font-bold text-xs rounded-xl shadow transition">
+                            Lihat Analisis Akhir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. CLASS MANAGEMENT VIEW (PRETEST, POSTTEST, ANALYSIS CLASS) -->
+        <section id="viewClassDetail" class="hidden w-full max-w-6xl mx-auto py-6">
+            <div class="flex items-center justify-between mb-6">
+                <button onclick="navTo('adminDashboard')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu Admin
+                </button>
+                <span id="currentClassBadge" class="px-3 py-1 bg-sky-100 text-sky-700 font-extrabold text-xs rounded-full border border-sky-200 uppercase">
+                    Kelas Eksperimen
+                </span>
+            </div>
+
+            <!-- Tab Menu Dalam Kelas -->
+            <div class="flex border-b border-slate-200 mb-6 gap-2 overflow-x-auto pb-1">
+                <button id="classTabBtnPre" onclick="switchClassTab('pre')" class="px-5 py-2.5 text-xs font-bold rounded-t-2xl border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines"></i> Pre-Test
+                </button>
+                <button id="classTabBtnPost" onclick="switchClassTab('post')" class="px-5 py-2.5 text-xs font-bold rounded-t-2xl text-slate-500 hover:text-purple-700 hover:bg-white/50 flex items-center gap-2">
+                    <i class="fa-solid fa-file-circle-check"></i> Post-Test
+                </button>
+                <button id="classTabBtnAnal" onclick="switchClassTab('analysis')" class="px-5 py-2.5 text-xs font-bold rounded-t-2xl text-slate-500 hover:text-purple-700 hover:bg-white/50 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> Analisis Kelas
+                </button>
+            </div>
+
+            <!-- Content Area Test (Pre/Post) -->
+            <div id="testContentWrapper" class="space-y-6">
+                <!-- Salin dari Pretest Action Button for Post-Test -->
+                <div id="copyPreToPostContainer" class="hidden justify-end">
+                    <button onclick="copyPreToPost()" class="px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold rounded-xl border border-amber-300 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> Salin Soal & Identitas dari Pre-Test
+                    </button>
+                </div>
+
+                <!-- Accordion / Sub Sections -->
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Left Sidebar Menu -->
+                    <div class="lg:col-span-1 space-y-2">
+                        <button onclick="switchTestSubTab('identity')" id="subBtnIdentity" class="w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-purple-600 text-white shadow-md flex items-center justify-between">
+                            <span>1. Identitas Instrumen</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button onclick="switchTestSubTab('bank')" id="subBtnBank" class="w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-white hover:bg-purple-50 text-slate-700 border border-slate-100 shadow-sm flex items-center justify-between transition">
+                            <span>2. Bank Soal (PG & Essay)</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button onclick="switchTestSubTab('responses')" id="subBtnResponses" class="w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-white hover:bg-purple-50 text-slate-700 border border-slate-100 shadow-sm flex items-center justify-between transition">
+                            <span>3. Jawaban Responden</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button onclick="switchTestSubTab('criteria')" id="subBtnCriteria" class="w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-white hover:bg-purple-50 text-slate-700 border border-slate-100 shadow-sm flex items-center justify-between transition">
+                            <span>4. Kriteria Penilaian</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button onclick="switchTestSubTab('testAnalysis')" id="subBtnTestAnalysis" class="w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-white hover:bg-purple-50 text-slate-700 border border-slate-100 shadow-sm flex items-center justify-between transition">
+                            <span>5. Analisis Test</span> <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+
+                        <div class="pt-4">
+                            <button onclick="saveAllTestChanges()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-extrabold text-xs rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Soal & Perubahan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Sub Tab Panel Content -->
+                    <div class="lg:col-span-3 bg-white rounded-3xl p-6 shadow-md border border-slate-100 min-h-[450px]">
+                        
+                        <!-- SUB TAB 1: IDENTITAS INSTRUMEN -->
+                        <div id="subTabIdentity" class="space-y-4">
+                            <h4 class="font-extrabold text-slate-800 text-base border-b pb-2">Pengaturan Identitas & Access Code</h4>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Kode Soal Access Siswa</label>
+                                    <input type="text" id="admTestCode" class="w-full px-4 py-2 text-sm rounded-xl border border-slate-200 font-mono font-bold uppercase text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Instrumen Evaluasi</label>
+                                    <input type="text" id="admTestName" class="w-full px-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Petunjuk Pengisian Soal Responden</label>
+                                <textarea id="admTestInstructions" rows="4" class="w-full p-4 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400" placeholder="Tuliskan petunjuk pengerjaan bagi siswa..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- SUB TAB 2: BANK SOAL -->
+                        <div id="subTabBank" class="hidden space-y-6">
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <h4 class="font-extrabold text-slate-800 text-base">Kelola Bank Soal (PG & Essay)</h4>
+                                <div class="flex gap-2">
+                                    <button onclick="openQuestionModal('pg')" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                                        <i class="fa-solid fa-plus"></i> + Soal PG (A-E)
+                                    </button>
+                                    <button onclick="openQuestionModal('essay')" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                                        <i class="fa-solid fa-plus"></i> + Soal Essay
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- List PG -->
+                            <div>
+                                <h5 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Daftar Pilihan Ganda</h5>
+                                <div id="admPGQuestionList" class="space-y-3">
+                                    <!-- Dynamic List PG -->
+                                </div>
+                            </div>
+
+                            <!-- List Essay -->
+                            <div class="pt-4 border-t">
+                                <h5 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Daftar Soal Essay</h5>
+                                <div id="admEssayQuestionList" class="space-y-3">
+                                    <!-- Dynamic List Essay -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SUB TAB 3: JAWABAN RESPONDEN -->
+                        <div id="subTabResponses" class="hidden space-y-4">
+                            <h4 class="font-extrabold text-slate-800 text-base border-b pb-2">Daftar Respon & Periksa Jawaban</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left text-slate-600">
+                                    <thead class="text-xs text-slate-700 uppercase bg-purple-50">
+                                        <tr>
+                                            <th class="px-3 py-2.5 rounded-l-xl">Nama Responden</th>
+                                            <th class="px-3 py-2.5">Skor PG</th>
+                                            <th class="px-3 py-2.5">Skor Essay</th>
+                                            <th class="px-3 py-2.5">Total Skor</th>
+                                            <th class="px-3 py-2.5">Kriteria</th>
+                                            <th class="px-3 py-2.5 rounded-r-xl text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="responseTableBody">
+                                        <!-- Dynamic Responses -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- SUB TAB 4: KRITERIA PENILAIAN -->
+                        <div id="subTabCriteria" class="hidden space-y-6">
+                            <h4 class="font-extrabold text-slate-800 text-base border-b pb-2">Rubrik Interval Kriteria Penilaian (Minimal 5 Interval)</h4>
+                            
+                            <!-- Kriteria PG -->
+                            <div>
+                                <h5 class="text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">1. Kriteria Soal Pilihan Ganda (Skor 0-100)</h5>
+                                <div id="pgCriteriaList" class="space-y-2">
+                                    <!-- Dynamic PG Criteria Inputs -->
+                                </div>
+                            </div>
+
+                            <!-- Kriteria Essay -->
+                            <div class="pt-4 border-t">
+                                <h5 class="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2">2. Kriteria Soal Essay (Skor 0-100)</h5>
+                                <div id="essayCriteriaList" class="space-y-2">
+                                    <!-- Dynamic Essay Criteria Inputs -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SUB TAB 5: ANALISIS TEST -->
+                        <div id="subTabTestAnalysis" class="hidden space-y-6">
+                            <h4 class="font-extrabold text-slate-800 text-base border-b pb-2">Analisis Perolehan Nilai Responden</h4>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 text-center">
+                                    <span class="text-xs text-slate-500 font-bold uppercase">Rata-rata Skor PG</span>
+                                    <p id="avgPGScore" class="text-2xl font-extrabold text-sky-600 mt-1">0</p>
+                                </div>
+                                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-center">
+                                    <span class="text-xs text-slate-500 font-bold uppercase">Rata-rata Skor Essay</span>
+                                    <p id="avgEssayScore" class="text-2xl font-extrabold text-purple-600 mt-1">0</p>
+                                </div>
+                            </div>
+
+                            <!-- Single Test Chart -->
+                            <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                                <h5 class="text-xs font-bold text-slate-700 mb-3">Grafik Sebaran Nilai Responden</h5>
+                                <div class="h-64 relative">
+                                    <canvas id="chartSingleTest"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Narasi Analisis -->
+                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                <h5 class="text-xs font-bold text-slate-700 mb-1">Analisis Deskriptif Naratif:</h5>
+                                <p id="singleTestNarrative" class="text-xs text-slate-600 leading-relaxed">
+                                    Belum ada data respon yang cukup untuk melakukan analisis deskriptif.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area Class Comparison Analysis -->
+            <div id="classAnalysisContentWrapper" class="hidden space-y-6 bg-white p-6 rounded-3xl shadow-md border border-slate-100">
+                <h4 class="font-extrabold text-slate-800 text-lg border-b pb-3">Perbandingan Pre-Test vs Post-Test (<span id="analClassName"></span>)</h4>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <h5 class="text-xs font-bold text-slate-700 mb-2">Grafik Komparasi Rata-rata</h5>
+                        <div class="h-64 relative">
+                            <canvas id="chartPrePostCompare"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-4 flex flex-col justify-center">
+                        <div class="p-4 bg-sky-50 border border-sky-200 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold">Rata-Rata Total Pre-Test</span>
+                            <h3 id="classPreAvgVal" class="text-2xl font-extrabold text-sky-700">0</h3>
+                        </div>
+                        <div class="p-4 bg-purple-50 border border-purple-200 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold">Rata-Rata Total Post-Test</span>
+                            <h3 id="classPostAvgVal" class="text-2xl font-extrabold text-purple-700">0</h3>
+                        </div>
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+                            <span class="text-xs text-slate-500 font-semibold">Gain / Peningkatan N-Gain</span>
+                            <h3 id="classGainVal" class="text-2xl font-extrabold text-emerald-700">0%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                    <h5 class="text-xs font-bold text-amber-900 mb-1">Uraian Analisis Peningkatan:</h5>
+                    <p id="classNarrativeAnalysis" class="text-xs text-amber-800 leading-relaxed"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. FINAL COMPARATIVE ANALYSIS VIEW -->
+        <section id="viewFinalAnalysis" class="hidden w-full max-w-6xl mx-auto py-6">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="navTo('adminDashboard')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard Admin
+                </button>
+                <span class="px-3 py-1 bg-amber-100 text-amber-800 font-extrabold text-xs rounded-full border border-amber-300">
+                    Analisis Akhir Komparatif
+                </span>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-amber-100 space-y-8">
+                <div class="text-center max-w-xl mx-auto">
+                    <h3 class="text-2xl font-extrabold text-slate-800">Analisis Perbandingan Akhir Penelitian</h3>
+                    <p class="text-xs text-slate-500 mt-1">Komparasi Efektivitas antara Kelas Eksperimen dan Kelas Kontrol</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <h5 class="text-xs font-bold text-slate-700 mb-3 text-center">Grafik Garis Komparasi Capaian Pembelajaran</h5>
+                        <div class="h-72 relative">
+                            <canvas id="chartFinalCompare"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 flex flex-col justify-center">
+                        <div class="p-4 bg-sky-50 rounded-2xl border border-sky-200 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-500 font-bold uppercase">N-Gain Kelas Eksperimen</span>
+                                <h4 id="finalExpGain" class="text-xl font-extrabold text-sky-700">0%</h4>
+                            </div>
+                            <i class="fa-solid fa-flask text-2xl text-sky-400"></i>
+                        </div>
+
+                        <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-slate-500 font-bold uppercase">N-Gain Kelas Kontrol</span>
+                                <h4 id="finalCtrlGain" class="text-xl font-extrabold text-purple-700">0%</h4>
+                            </div>
+                            <i class="fa-solid fa-scale-balanced text-2xl text-purple-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descriptive Final Narrative -->
+                <div class="p-6 bg-gradient-to-r from-amber-50 to-purple-50 rounded-2xl border border-purple-100 space-y-3">
+                    <h4 class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-square-poll-vertical text-purple-600"></i> Uraian Analisis Akhir Penelitian
+                    </h4>
+                    <p id="finalAnalysisText" class="text-xs text-slate-700 leading-relaxed">
+                        Memuat data analisis komparasi...
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Form Add/Edit Question -->
+    <div id="questionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-purple-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="qModalTitle" class="font-extrabold text-slate-800 text-base">Tambah Soal</h3>
+                <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="formQuestion" onsubmit="event.preventDefault(); saveQuestionItem();" class="space-y-4">
+                <input type="hidden" id="qType">
+                <input type="hidden" id="qEditIndex" value="-1">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Pertanyaan Soal</label>
+                    <textarea id="qText" required rows="3" class="w-full p-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Upload Gambar Soal (Opsional - Langsung Perangkat)</label>
+                    <input type="file" id="qImageInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                    <div id="qImagePreview" class="mt-2 hidden">
+                        <img id="imgPreviewTag" src="" class="max-h-32 rounded-xl border">
+                        <button type="button" onclick="removeQuestionImage()" class="text-xs text-red-600 underline mt-1">Hapus Gambar</button>
+                    </div>
+                </div>
+
+                <!-- PG Options A-E -->
+                <div id="pgOptionsGroup" class="space-y-2 border-t pt-3">
+                    <label class="block text-xs font-bold text-slate-700">Pilihan Jawaban & Kunci Jawaban Indikator</label>
+                    
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs w-4">A.</span>
+                        <input type="text" id="optA" placeholder="Pilihan A" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200">
+                        <input type="radio" name="correctKey" value="A" id="keyA"> <label for="keyA" class="text-xs font-semibold">Kunci</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs w-4">B.</span>
+                        <input type="text" id="optB" placeholder="Pilihan B" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200">
+                        <input type="radio" name="correctKey" value="B" id="keyB"> <label for="keyB" class="text-xs font-semibold">Kunci</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs w-4">C.</span>
+                        <input type="text" id="optC" placeholder="Pilihan C" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200">
+                        <input type="radio" name="correctKey" value="C" id="keyC"> <label for="keyC" class="text-xs font-semibold">Kunci</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs w-4">D.</span>
+                        <input type="text" id="optD" placeholder="Pilihan D" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200">
+                        <input type="radio" name="correctKey" value="D" id="keyD"> <label for="keyD" class="text-xs font-semibold">Kunci</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs w-4">E.</span>
+                        <input type="text" id="optE" placeholder="Pilihan E" class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200">
+                        <input type="radio" name="correctKey" value="E" id="keyE"> <label for="keyE" class="text-xs font-semibold">Kunci</label>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 text-white text-xs font-bold rounded-xl shadow">Simpan Soal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Periksa Essay Admin -->
+    <div id="gradeEssayModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-purple-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="font-extrabold text-slate-800 text-base">Periksa Jawaban Essay Siswa</h3>
+                <button onclick="closeGradeEssayModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="essayGradeContent" class="space-y-4 text-xs">
+                <!-- Dynamic Essay Grade Inputs -->
+            </div>
+
+            <div class="pt-4 border-t mt-4 flex justify-end gap-2">
+                <button onclick="closeGradeEssayModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveEssayScores()" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow">Simpan Skor Essay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="mainFooter" class="bg-white/60 border-t border-purple-100 py-3 text-center text-xs text-slate-400 mt-auto">
+        Instrumen Penelitian &copy; 2026 - Digital Evaluation System
+    </footer>
+
+    <!-- SCRIPT APPLICATION CORE LOGIC -->
+    <script>
+        // WEBHOOK GOOGLE SHEETS URL INTEGRATION
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeZgycsx7eR_a-nsLpHrSnz-yOInQJgjGjQs-HeyN_6gMk9bnVyEI28Lu3_610Qq2y/exec";
+
+        // APP INITIAL STATE / DATA STRUCTURE
+        const DEFAULT_DATA = {
+            adminAccounts: [], // Array of {name, email, pass}
+            currentAdmin: null,
+            classes: {
+                experiment: {
+                    name: "Kelas Eksperimen",
+                    pre: {
+                        identity: { code: "EXP-PRE", name: "Pre-Test Kelas Eksperimen", instructions: "Kerjakan soal secara mandiri dan jujur." },
+                        questionsPG: [],
+                        questionsEssay: [],
+                        responses: [],
+                        criteriaPG: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ],
+                        criteriaEssay: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ]
+                    },
+                    post: {
+                        identity: { code: "EXP-POST", name: "Post-Test Kelas Eksperimen", instructions: "Jawablah dengan teliti setelah tindakan pembelajaran." },
+                        questionsPG: [],
+                        questionsEssay: [],
+                        responses: [],
+                        criteriaPG: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ],
+                        criteriaEssay: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ]
+                    }
+                },
+                control: {
+                    name: "Kelas Kontrol",
+                    pre: {
+                        identity: { code: "CTRL-PRE", name: "Pre-Test Kelas Kontrol", instructions: "Isilah soal tes berikut dengan cermat." },
+                        questionsPG: [],
+                        questionsEssay: [],
+                        responses: [],
+                        criteriaPG: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ],
+                        criteriaEssay: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ]
+                    },
+                    post: {
+                        identity: { code: "CTRL-POST", name: "Post-Test Kelas Kontrol", instructions: "Kerjakan evaluasi post-test berikut." },
+                        questionsPG: [],
+                        questionsEssay: [],
+                        responses: [],
+                        criteriaPG: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ],
+                        criteriaEssay: [
+                            { min: 85, max: 100, label: "Sangat Baik" },
+                            { min: 70, max: 84, label: "Baik" },
+                            { min: 55, max: 69, label: "Cukup" },
+                            { min: 40, max: 54, label: "Kurang" },
+                            { min: 0, max: 39, label: "Sangat Kurang" }
+                        ]
+                    }
+                }
+            }
+        };
+
+        let appData = JSON.parse(localStorage.getItem('instrumen_penelitian_data')) || DEFAULT_DATA;
+
+        function saveState() {
+            localStorage.setItem('instrumen_penelitian_data', JSON.stringify(appData));
+        }
+
+        // NAVIGATION CONTROLLER
+        let currentView = 'home';
+        let currentSelectedClass = 'experiment'; // 'experiment' | 'control'
+        let currentSelectedTest = 'pre'; // 'pre' | 'post'
+        let currentSelectedSubTab = 'identity';
+
+        // STUDENT ACTIVE EXAM STATE
+        let activeStudentExam = {
+            name: '',
+            class: '',
+            code: '',
+            targetClassKey: '',
+            targetTestKey: '',
+            answersPG: {},
+            answersEssay: {}
+        };
+
+        // CHART OBJECT REFERENCES
+        let chartSingleObj = null;
+        let chartCompareObj = null;
+        let chartFinalObj = null;
+
+        window.onload = function() {
+            // Check student inputs code change for auto hints
+            document.getElementById('stdCode').addEventListener('input', checkStudentCodeHint);
+            navTo('home');
+        };
+
+        function navTo(viewId) {
+            currentView = viewId;
+            const views = ['viewHome', 'viewStudentLogin', 'viewStudentExam', 'viewAdminAuth', 'viewAdminDashboard', 'viewClassDetail', 'viewFinalAnalysis'];
+            
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
+            });
+
+            const targetView = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+            if(targetView) targetView.classList.remove('hidden');
+
+            // Header/Footer visibility control
+            if(viewId === 'studentExam') {
+                document.getElementById('mainHeader').classList.add('hidden');
+                document.getElementById('mainFooter').classList.add('hidden');
+            } else {
+                document.getElementById('mainHeader').classList.remove('hidden');
+                document.getElementById('mainFooter').classList.remove('hidden');
+            }
+        }
+
+        // TOAST NOTIFICATION SYSTEM
+        function showToast(title, message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const tTitle = document.getElementById('toastTitle');
+            const tMsg = document.getElementById('toastMessage');
+            const tIcon = document.getElementById('toastIcon');
+
+            tTitle.innerText = title;
+            tMsg.innerText = message;
+
+            if(type === 'success') {
+                toast.className = "fixed bottom-5 right-5 z-50 transition-all duration-300 max-w-md bg-white border-l-4 border-emerald-500 p-4 rounded-xl shadow-2xl flex items-start space-x-3";
+                tIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i>`;
+            } else if(type === 'error') {
+                toast.className = "fixed bottom-5 right-5 z-50 transition-all duration-300 max-w-md bg-white border-l-4 border-red-500 p-4 rounded-xl shadow-2xl flex items-start space-x-3";
+                tIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500"></i>`;
+            } else {
+                toast.className = "fixed bottom-5 right-5 z-50 transition-all duration-300 max-w-md bg-white border-l-4 border-sky-500 p-4 rounded-xl shadow-2xl flex items-start space-x-3";
+                tIcon.innerHTML = `<i class="fa-solid fa-circle-info text-sky-500"></i>`;
+            }
+
+            toast.classList.remove('opacity-0', 'translate-y-20');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-20');
+            }, 3500);
+        }
+
+        // MODAL SYSTEM
+        let modalConfirmCallback = null;
+        function openModal(title, message, onConfirm) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            modalConfirmCallback = onConfirm;
+            
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('customModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('customModalContent');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        document.getElementById('modalBtnConfirm').onclick = function() {
+            if(modalConfirmCallback) modalConfirmCallback();
+            closeModal();
+        };
+
+        // ADMIN AUTHENTICATION MANAGEMENT
+        function checkAdminAuthNav() {
+            if(appData.currentAdmin) {
+                renderAdminDashboard();
+                navTo('adminDashboard');
+            } else {
+                switchAdminAuthTab('login');
+                navTo('adminAuth');
+            }
+        }
+
+        function switchAdminAuthTab(tab) {
+            const loginForm = document.getElementById('formAdminLogin');
+            const regForm = document.getElementById('formAdminRegister');
+            const btnLogin = document.getElementById('tabBtnLogin');
+            const btnReg = document.getElementById('tabBtnRegister');
+
+            if(tab === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                btnLogin.className = "flex-1 py-2 text-xs font-bold rounded-xl transition bg-white text-purple-700 shadow-sm";
+                btnReg.className = "flex-1 py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-purple-700";
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                btnReg.className = "flex-1 py-2 text-xs font-bold rounded-xl transition bg-white text-purple-700 shadow-sm";
+                btnLogin.className = "flex-1 py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-purple-700";
+            }
+        }
+
+        function handleAdminRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('regPass').value;
+
+            if(!appData.adminAccounts) appData.adminAccounts = [];
+
+            const exists = appData.adminAccounts.find(a => a.email === email);
+            if(exists) {
+                showToast('Gagal Mendaftar', 'Email admin sudah terdaftar. Silakan langsung login.', 'error');
+                return;
+            }
+
+            appData.adminAccounts.push({ name, email, pass });
+            saveState();
+            showToast('Akun Berhasil Dibuat', 'Silakan login menggunakan akun yang baru saja dibuat.', 'success');
+            
+            // Switch back to login form & prepopulate
+            switchAdminAuthTab('login');
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPass').value = pass;
+        }
+
+        function handleAdminLogin() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+
+            const user = (appData.adminAccounts || []).find(a => a.email === email && a.pass === pass);
+            
+            // Fallback default admin if empty list
+            if(!user && email === "admin@penelitian.com" && pass === "admin123") {
+                appData.currentAdmin = { name: "Peneliti Utama", email: email };
+                saveState();
+                renderAdminDashboard();
+                navTo('adminDashboard');
+                showToast('Login Berhasil', 'Selamat datang di Panel Admin.', 'success');
+                return;
+            }
+
+            if(user) {
+                appData.currentAdmin = { name: user.name, email: user.email };
+                saveState();
+                renderAdminDashboard();
+                navTo('adminDashboard');
+                showToast('Login Berhasil', 'Selamat datang, ' + user.name, 'success');
+            } else {
+                showToast('Login Gagal', 'Email atau Kata Sandi salah.', 'error');
+            }
+        }
+
+        function adminLogout() {
+            appData.currentAdmin = null;
+            saveState();
+            navTo('home');
+            showToast('Keluar', 'Anda telah keluar dari akun admin.', 'info');
+        }
+
+        function renderAdminDashboard() {
+            if(appData.currentAdmin) {
+                document.getElementById('adminProfileName').innerText = appData.currentAdmin.name;
+                document.getElementById('adminProfileEmail').innerText = appData.currentAdmin.email;
+            }
+        }
+
+        // ADMIN CLASS MANAGEMENT LOGIC
+        function openClassManagement(classKey) {
+            currentSelectedClass = classKey;
+            currentSelectedTest = 'pre';
+            currentSelectedSubTab = 'identity';
+
+            const classObj = appData.classes[classKey];
+            document.getElementById('currentClassBadge').innerText = classObj.name;
+            
+            switchClassTab('pre');
+            navTo('classDetail');
+        }
+
+        function switchClassTab(tabKey) {
+            currentSelectedTest = tabKey;
+
+            const btnPre = document.getElementById('classTabBtnPre');
+            const btnPost = document.getElementById('classTabBtnPost');
+            const btnAnal = document.getElementById('classTabBtnAnal');
+
+            const testWrapper = document.getElementById('testContentWrapper');
+            const classAnalysisWrapper = document.getElementById('classAnalysisContentWrapper');
+
+            // Reset buttons style
+            [btnPre, btnPost, btnAnal].forEach(b => {
+                b.className = "px-5 py-2.5 text-xs font-bold rounded-t-2xl text-slate-500 hover:text-purple-700 hover:bg-white/50 flex items-center gap-2";
+            });
+
+            if(tabKey === 'pre') {
+                btnPre.className = "px-5 py-2.5 text-xs font-bold rounded-t-2xl border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center gap-2";
+                testWrapper.classList.remove('hidden');
+                classAnalysisWrapper.classList.add('hidden');
+                document.getElementById('copyPreToPostContainer').classList.add('hidden');
+                switchTestSubTab(currentSelectedSubTab || 'identity');
+            } else if(tabKey === 'post') {
+                btnPost.className = "px-5 py-2.5 text-xs font-bold rounded-t-2xl border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center gap-2";
+                testWrapper.classList.remove('hidden');
+                classAnalysisWrapper.classList.add('hidden');
+                document.getElementById('copyPreToPostContainer').classList.remove('hidden');
+                switchTestSubTab(currentSelectedSubTab || 'identity');
+            } else if(tabKey === 'analysis') {
+                btnAnal.className = "px-5 py-2.5 text-xs font-bold rounded-t-2xl border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center gap-2";
+                testWrapper.classList.add('hidden');
+                classAnalysisWrapper.classList.remove('hidden');
+                renderClassAnalysis();
+            }
+        }
+
+        function switchTestSubTab(subKey) {
+            currentSelectedSubTab = subKey;
+            const subs = ['identity', 'bank', 'responses', 'criteria', 'testAnalysis'];
+
+            subs.forEach(s => {
+                const btn = document.getElementById('subBtn' + s.charAt(0).toUpperCase() + s.slice(1));
+                const content = document.getElementById('subTab' + s.charAt(0).toUpperCase() + s.slice(1));
+                
+                if(s === subKey) {
+                    btn.className = "w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-purple-600 text-white shadow-md flex items-center justify-between";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "w-full text-left px-4 py-3 rounded-2xl font-bold text-xs bg-white hover:bg-purple-50 text-slate-700 border border-slate-100 shadow-sm flex items-center justify-between transition";
+                    content.classList.add('hidden');
+                }
+            });
+
+            // Populate view data based on current sub tab
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            
+            if(subKey === 'identity') {
+                document.getElementById('admTestCode').value = testData.identity.code || '';
+                document.getElementById('admTestName').value = testData.identity.name || '';
+                document.getElementById('admTestInstructions').value = testData.identity.instructions || '';
+            } else if(subKey === 'bank') {
+                renderBankQuestions();
+            } else if(subKey === 'responses') {
+                renderResponsesTable();
+            } else if(subKey === 'criteria') {
+                renderCriteriaEditors();
+            } else if(subKey === 'testAnalysis') {
+                renderSingleTestAnalysis();
+            }
+        }
+
+        // COPY DATA INDEPENDENTLY (EXPERIMENTAL TO CONTROL & PRE TO POST)
+        function copyExperimentToControl() {
+            openModal(
+                "Salin dari Kelas Eksperimen",
+                "Apakah Anda yakin ingin menyalin semua soal, identitas, dan kriteria dari Kelas Eksperimen ke Kelas Kontrol? Data di Kelas Kontrol yang ada akan diperbarui.",
+                () => {
+                    const exp = appData.classes.experiment;
+                    appData.classes.control.pre = JSON.parse(JSON.stringify(exp.pre));
+                    appData.classes.control.post = JSON.parse(JSON.stringify(exp.post));
+                    
+                    // Adjust codes to keep unique access code
+                    appData.classes.control.pre.identity.code = "CTRL-PRE";
+                    appData.classes.control.post.identity.code = "CTRL-POST";
+                    
+                    saveState();
+                    showToast('Data Disalin', 'Kelas Kontrol telah diperbarui dari Kelas Eksperimen.', 'success');
+                }
+            );
+        }
+
+        function copyPreToPost() {
+            openModal(
+                "Salin dari Pre-Test",
+                "Apakah Anda yakin ingin menyalin Bank Soal dan Kriteria Penilaian dari Pre-Test ke Post-Test kelas ini?",
+                () => {
+                    const currentClass = appData.classes[currentSelectedClass];
+                    currentClass.post.questionsPG = JSON.parse(JSON.stringify(currentClass.pre.questionsPG));
+                    currentClass.post.questionsEssay = JSON.parse(JSON.stringify(currentClass.pre.questionsEssay));
+                    currentClass.post.criteriaPG = JSON.parse(JSON.stringify(currentClass.pre.criteriaPG));
+                    currentClass.post.criteriaEssay = JSON.parse(JSON.stringify(currentClass.pre.criteriaEssay));
+
+                    saveState();
+                    switchTestSubTab(currentSelectedSubTab);
+                    showToast('Disalin', 'Soal & Kriteria Pre-Test berhasil disalin ke Post-Test.', 'success');
+                }
+            );
+        }
+
+        // SAVE ALL TEST CHANGES (REAL-TIME UPDATES TO STUDENT EXAM)
+        function saveAllTestChanges() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            
+            // Save Identity
+            testData.identity.code = document.getElementById('admTestCode').value.trim().toUpperCase();
+            testData.identity.name = document.getElementById('admTestName').value.trim();
+            testData.identity.instructions = document.getElementById('admTestInstructions').value.trim();
+
+            // Save Criteria Inputs
+            const pgInputs = document.querySelectorAll('.pg-crit-row');
+            const newPgCrit = [];
+            pgInputs.forEach(row => {
+                const min = parseInt(row.querySelector('.crit-min').value) || 0;
+                const max = parseInt(row.querySelector('.crit-max').value) || 100;
+                const label = row.querySelector('.crit-label').value.trim();
+                newPgCrit.push({ min, max, label });
+            });
+            if(newPgCrit.length >= 5) testData.criteriaPG = newPgCrit;
+
+            const essayInputs = document.querySelectorAll('.essay-crit-row');
+            const newEssayCrit = [];
+            essayInputs.forEach(row => {
+                const min = parseInt(row.querySelector('.crit-min').value) || 0;
+                const max = parseInt(row.querySelector('.crit-max').value) || 100;
+                const label = row.querySelector('.crit-label').value.trim();
+                newEssayCrit.push({ min, max, label });
+            });
+            if(newEssayCrit.length >= 5) testData.criteriaEssay = newEssayCrit;
+
+            saveState();
+            showToast('Simpan Berhasil', 'Soal dan perubahan instrumen telah disimpan dan terhubung real-time ke siswa.', 'success');
+        }
+
+        // QUESTION BANK MODAL LOGIC & RENDERING
+        let currentTempImageBase64 = null;
+
+        // Generate ID unik per soal agar tidak saling memengaruhi
+        function generateUUID() {
+            return 'q_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        function openQuestionModal(type, editIdx = -1) {
+            document.getElementById('qType').value = type;
+            document.getElementById('qEditIndex').value = editIdx;
+            currentTempImageBase64 = null;
+            document.getElementById('qImageInput').value = '';
+            document.getElementById('qImagePreview').classList.add('hidden');
+
+            const modalTitle = document.getElementById('qModalTitle');
+            const pgGroup = document.getElementById('pgOptionsGroup');
+
+            const radios = document.getElementsByName('correctKey');
+
+            if(type === 'pg') {
+                modalTitle.innerText = editIdx >= 0 ? "Edit Soal Pilihan Ganda" : "Tambah Soal Pilihan Ganda";
+                pgGroup.classList.remove('hidden');
+                // Aktifkan required hanya untuk PG
+                radios[0].required = true;
+            } else {
+                modalTitle.innerText = editIdx >= 0 ? "Edit Soal Essay" : "Tambah Soal Essay";
+                pgGroup.classList.add('hidden');
+                // Matikan required untuk Essay agar form tidak terhalang validasi PG
+                radios.forEach(r => r.required = false);
+            }
+
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+
+            if(editIdx >= 0) {
+                const qList = type === 'pg' ? testData.questionsPG : testData.questionsEssay;
+                const qItem = qList[editIdx];
+
+                document.getElementById('qText').value = qItem.text || '';
+                if(qItem.image) {
+                    currentTempImageBase64 = qItem.image;
+                    document.getElementById('imgPreviewTag').src = qItem.image;
+                    document.getElementById('qImagePreview').classList.remove('hidden');
+                }
+
+                if(type === 'pg') {
+                    document.getElementById('optA').value = qItem.options ? qItem.options.A || '' : '';
+                    document.getElementById('optB').value = qItem.options ? qItem.options.B || '' : '';
+                    document.getElementById('optC').value = qItem.options ? qItem.options.C || '' : '';
+                    document.getElementById('optD').value = qItem.options ? qItem.options.D || '' : '';
+                    document.getElementById('optE').value = qItem.options ? qItem.options.E || '' : '';
+
+                    radios.forEach(r => { if(r.value === qItem.key) r.checked = true; });
+                }
+            } else {
+                document.getElementById('formQuestion').reset();
+                if(type === 'pg') {
+                    radios[0].checked = true;
+                }
+            }
+
+            // Image file reader handler
+            document.getElementById('qImageInput').onchange = function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        currentTempImageBase64 = evt.target.result;
+                        document.getElementById('imgPreviewTag').src = currentTempImageBase64;
+                        document.getElementById('qImagePreview').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            document.getElementById('questionModal').classList.remove('hidden');
+        }
+
+        function removeQuestionImage() {
+            currentTempImageBase64 = null;
+            document.getElementById('qImageInput').value = '';
+            document.getElementById('qImagePreview').classList.add('hidden');
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').classList.add('hidden');
+        }
+
+        function saveQuestionItem() {
+            const type = document.getElementById('qType').value;
+            const editIdx = parseInt(document.getElementById('qEditIndex').value);
+            const text = document.getElementById('qText').value.trim();
+
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const targetList = type === 'pg' ? testData.questionsPG : testData.questionsEssay;
+
+            const existingId = (editIdx >= 0 && targetList[editIdx]) ? targetList[editIdx].id : generateUUID();
+
+            let newItem = {
+                id: existingId,
+                text: text,
+                image: currentTempImageBase64 || (editIdx >= 0 && targetList[editIdx] ? targetList[editIdx].image : null)
+            };
+
+            if(type === 'pg') {
+                const opts = {
+                    A: document.getElementById('optA').value.trim(),
+                    B: document.getElementById('optB').value.trim(),
+                    C: document.getElementById('optC').value.trim(),
+                    D: document.getElementById('optD').value.trim(),
+                    E: document.getElementById('optE').value.trim()
+                };
+                let selectedKey = 'A';
+                const radios = document.getElementsByName('correctKey');
+                radios.forEach(r => { if(r.checked) selectedKey = r.value; });
+
+                newItem.options = opts;
+                newItem.key = selectedKey;
+            }
+
+            // Operasi Edit/Update secara independen hanya untuk 1 item spesifik
+            if(editIdx >= 0 && editIdx < targetList.length) {
+                targetList[editIdx] = newItem;
+            } else {
+                targetList.push(newItem);
+            }
+
+            saveState();
+            closeQuestionModal();
+            renderBankQuestions();
+            showToast('Soal Disimpan', `Soal ${type === 'pg' ? 'Pilihan Ganda' : 'Essay'} berhasil diperbarui secara mandiri.`, 'success');
+        }
+
+        // Simpan langsung dari Kartu Soal per-item tanpa mengganggu soal lain
+        function inlineSaveQuestion(type, idx) {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const targetList = type === 'pg' ? testData.questionsPG : testData.questionsEssay;
+            const item = targetList[idx];
+
+            if(!item) return;
+
+            const textInput = document.getElementById(`inline_text_${type}_${idx}`);
+            if(textInput) item.text = textInput.value.trim();
+
+            if(type === 'pg') {
+                ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
+                    const optInput = document.getElementById(`inline_opt_${idx}_${opt}`);
+                    if(optInput && item.options) {
+                        item.options[opt] = optInput.value.trim();
+                    }
+                });
+                const keySelect = document.getElementById(`inline_key_${idx}`);
+                if(keySelect) item.key = keySelect.value;
+            }
+
+            saveState();
+            renderBankQuestions();
+            showToast('Simpan Berhasil', `Perubahan Soal No. ${idx + 1} berhasil disimpan secara independen.`, 'success');
+        }
+
+        function deleteQuestionItem(type, idx) {
+            openModal("Hapus Soal", "Apakah Anda yakin ingin menghapus soal ini? Soal lain tidak akan terpengaruh.", () => {
+                const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+                if(type === 'pg') {
+                    testData.questionsPG.splice(idx, 1);
+                } else {
+                    testData.questionsEssay.splice(idx, 1);
+                }
+                saveState();
+                renderBankQuestions();
+                showToast('Hapus Soal', 'Soal telah dihapus.', 'info');
+            });
+        }
+
+        function renderBankQuestions() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            
+            // Render PG List dengan Tombol Simpan Independen Per-Soal
+            const pgContainer = document.getElementById('admPGQuestionList');
+            pgContainer.innerHTML = '';
+            if(!testData.questionsPG || testData.questionsPG.length === 0) {
+                pgContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada soal pilihan ganda.</p>`;
+            } else {
+                testData.questionsPG.forEach((q, idx) => {
+                    if(!q.id) q.id = generateUUID(); // Pastikan setiap soal memiliki ID unik
+                    const card = document.createElement('div');
+                    card.className = "p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between gap-3 shadow-sm hover:border-sky-300 transition";
+                    card.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <span class="font-bold text-xs text-sky-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-list-check"></i> Soal PG ${idx + 1}
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="inlineSaveQuestion('pg', ${idx})" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold text-[11px] rounded-lg transition flex items-center gap-1" title="Simpan perubahan soal ini saja">
+                                        <i class="fa-solid fa-floppy-disk"></i> Simpan Soal
+                                    </button>
+                                    <button onclick="openQuestionModal('pg', ${idx})" class="p-1.5 text-slate-500 hover:text-purple-600 rounded-lg hover:bg-white" title="Edit via Modal"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                                    <button onclick="deleteQuestionItem('pg', ${idx})" class="p-1.5 text-slate-500 hover:text-red-600 rounded-lg hover:bg-white" title="Hapus Soal Ini"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">Teks Pertanyaan Soal:</label>
+                                <textarea id="inline_text_pg_${idx}" rows="2" class="w-full p-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white font-medium">${q.text || ''}</textarea>
+                            </div>
+
+                            ${q.image ? `<div class="relative max-w-fit"><img src="${q.image}" class="max-h-24 rounded-lg border"></div>` : ''}
+                            
+                            <div class="space-y-1.5 pt-1">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-[11px] font-bold text-slate-500">Pilihan Jawaban (A-E):</label>
+                                    <div class="flex items-center gap-1 text-[11px]">
+                                        <span class="font-bold text-slate-600">Kunci Jawaban:</span>
+                                        <select id="inline_key_${idx}" class="px-2 py-0.5 border rounded-lg font-bold text-sky-700 bg-white text-xs">
+                                            ${['A','B','C','D','E'].map(k => `<option value="${k}" ${q.key === k ? 'selected' : ''}>${k}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-5 gap-1.5 text-xs">
+                                    ${['A','B','C','D','E'].map(opt => `
+                                        <div class="flex items-center gap-1 bg-white p-1 rounded-xl border ${q.key === opt ? 'border-emerald-400 bg-emerald-50/30' : 'border-slate-200'}">
+                                            <span class="font-bold text-[11px] text-slate-600 w-3 text-center">${opt}.</span>
+                                            <input type="text" id="inline_opt_${idx}_${opt}" value="${q.options ? q.options[opt] || '' : ''}" class="w-full text-xs p-1 focus:outline-none bg-transparent">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    pgContainer.appendChild(card);
+                });
+            }
+
+            // Render Essay List dengan Tombol Simpan Independen Per-Soal
+            const essayContainer = document.getElementById('admEssayQuestionList');
+            essayContainer.innerHTML = '';
+            if(!testData.questionsEssay || testData.questionsEssay.length === 0) {
+                essayContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada soal essay.</p>`;
+            } else {
+                testData.questionsEssay.forEach((q, idx) => {
+                    if(!q.id) q.id = generateUUID(); // Pastikan setiap soal memiliki ID unik
+                    const card = document.createElement('div');
+                    card.className = "p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between gap-3 shadow-sm hover:border-purple-300 transition";
+                    card.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <span class="font-bold text-xs text-purple-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-pen"></i> Soal Essay ${idx + 1}
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="inlineSaveQuestion('essay', ${idx})" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-bold text-[11px] rounded-lg transition flex items-center gap-1" title="Simpan perubahan soal ini saja">
+                                        <i class="fa-solid fa-floppy-disk"></i> Simpan Soal
+                                    </button>
+                                    <button onclick="openQuestionModal('essay', ${idx})" class="p-1.5 text-slate-500 hover:text-purple-600 rounded-lg hover:bg-white" title="Edit via Modal"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                                    <button onclick="deleteQuestionItem('essay', ${idx})" class="p-1.5 text-slate-500 hover:text-red-600 rounded-lg hover:bg-white" title="Hapus Soal Ini"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">Pertanyaan Essay:</label>
+                                <textarea id="inline_text_essay_${idx}" rows="2" class="w-full p-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white font-medium">${q.text || ''}</textarea>
+                            </div>
+                            ${q.image ? `<div class="relative max-w-fit"><img src="${q.image}" class="max-h-24 rounded-lg border"></div>` : ''}
+                        </div>
+                    `;
+                    essayContainer.appendChild(card);
+                });
+            }
+        }
+
+        // CRITERIA EDITOR RENDERING
+        function renderCriteriaEditors() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+
+            // Render PG Criteria
+            const pgContainer = document.getElementById('pgCriteriaList');
+            pgContainer.innerHTML = '';
+            testData.criteriaPG.forEach((crit, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-2 pg-crit-row text-xs";
+                row.innerHTML = `
+                    <span class="w-16 font-bold text-slate-500">Rentang ${idx+1}:</span>
+                    <input type="number" value="${crit.min}" min="0" max="100" class="w-16 px-2 py-1 border rounded-lg crit-min">
+                    <span>-</span>
+                    <input type="number" value="${crit.max}" min="0" max="100" class="w-16 px-2 py-1 border rounded-lg crit-max">
+                    <input type="text" value="${crit.label}" placeholder="Kriteria (misal: Baik)" class="flex-1 px-3 py-1 border rounded-lg crit-label">
+                `;
+                pgContainer.appendChild(row);
+            });
+
+            // Render Essay Criteria
+            const essayContainer = document.getElementById('essayCriteriaList');
+            essayContainer.innerHTML = '';
+            testData.criteriaEssay.forEach((crit, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-2 essay-crit-row text-xs";
+                row.innerHTML = `
+                    <span class="w-16 font-bold text-slate-500">Rentang ${idx+1}:</span>
+                    <input type="number" value="${crit.min}" min="0" max="100" class="w-16 px-2 py-1 border rounded-lg crit-min">
+                    <span>-</span>
+                    <input type="number" value="${crit.max}" min="0" max="100" class="w-16 px-2 py-1 border rounded-lg crit-max">
+                    <input type="text" value="${crit.label}" placeholder="Kriteria (misal: Baik)" class="flex-1 px-3 py-1 border rounded-lg crit-label">
+                `;
+                essayContainer.appendChild(row);
+            });
+        }
+
+        function calculateCriteriaLabel(score, criteriaList) {
+            const item = criteriaList.find(c => score >= c.min && score <= c.max);
+            return item ? item.label : "Tidak Terdefinisi";
+        }
+
+        // RESPONSES TABLE & ESSAY GRADING LOGIC
+        function renderResponsesTable() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const tbody = document.getElementById('responseTableBody');
+            tbody.innerHTML = '';
+
+            if(!testData.responses || testData.responses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-4 text-center text-slate-400 italic">Belum ada siswa yang menjawab.</td></tr>`;
+                return;
+            }
+
+            testData.responses.forEach((resp, idx) => {
+                const totalScore = Math.round((resp.pgScore + (resp.essayScore || 0)) / 2);
+                const criteriaLabel = calculateCriteriaLabel(totalScore, testData.criteriaPG);
+
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-slate-50";
+                tr.innerHTML = `
+                    <td class="px-3 py-2.5 font-bold text-slate-800">${resp.studentName} <span class="text-[10px] text-slate-400 font-normal">(${resp.studentClass})</span></td>
+                    <td class="px-3 py-2.5 font-semibold text-sky-600">${resp.pgScore}</td>
+                    <td class="px-3 py-2.5 font-semibold text-purple-600">${resp.essayScore !== undefined ? resp.essayScore : '<span class="text-amber-500 font-bold">Belum Diperiksa</span>'}</td>
+                    <td class="px-3 py-2.5 font-extrabold text-slate-800">${totalScore}</td>
+                    <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">${criteriaLabel}</span></td>
+                    <td class="px-3 py-2.5 text-center flex justify-center gap-1">
+                        <button onclick="openGradeEssayModal(${idx})" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold rounded-lg text-[11px] transition">
+                            <i class="fa-solid fa-file-signature"></i> Periksa
+                        </button>
+                        <button onclick="deleteResponseItem(${idx})" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold rounded-lg text-[11px] transition" title="Hapus jika ganda (>2 kali)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let currentGradingResponseIdx = -1;
+
+        function openGradeEssayModal(respIdx) {
+            currentGradingResponseIdx = respIdx;
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const resp = testData.responses[respIdx];
+            const essayQuestions = testData.questionsEssay;
+
+            const container = document.getElementById('essayGradeContent');
+            container.innerHTML = `
+                <div class="p-3 bg-purple-50 rounded-xl mb-3">
+                    <p class="font-bold text-slate-800">${resp.studentName} (${resp.studentClass})</p>
+                </div>
+            `;
+
+            if(essayQuestions.length === 0) {
+                container.innerHTML += `<p class="italic text-slate-400">Tidak ada soal essay dalam tes ini.</p>`;
+            } else {
+                essayQuestions.forEach((q, qIdx) => {
+                    const studentAns = (resp.answersEssay || {})[qIdx] || '<i>Tidak dijawab</i>';
+                    const currentScore = ((resp.essayScoresDetail || {})[qIdx] !== undefined) ? resp.essayScoresDetail[qIdx] : 0;
+
+                    const item = document.createElement('div');
+                    item.className = "p-3 border rounded-xl space-y-1.5 bg-slate-50";
+                    item.innerHTML = `
+                        <p class="font-bold text-slate-700">Soal ${qIdx + 1}: ${q.text}</p>
+                        <div class="p-2 bg-white rounded-lg border text-slate-600 italic">" ${studentAns} "</div>
+                        <div class="flex items-center gap-2 pt-1">
+                            <label class="font-bold text-slate-700">Skor (0-100):</label>
+                            <input type="number" min="0" max="100" value="${currentScore}" class="essay-score-input w-20 px-2 py-1 border rounded-lg font-bold text-purple-700">
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            document.getElementById('gradeEssayModal').classList.remove('hidden');
+        }
+
+        function closeGradeEssayModal() {
+            document.getElementById('gradeEssayModal').classList.add('hidden');
+        }
+
+        function saveEssayScores() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const resp = testData.responses[currentGradingResponseIdx];
+
+            const inputs = document.querySelectorAll('.essay-score-input');
+            let total = 0;
+            const scoresDetail = {};
+
+            inputs.forEach((input, idx) => {
+                const val = parseInt(input.value) || 0;
+                scoresDetail[idx] = val;
+                total += val;
+            });
+
+            const avgEssay = inputs.length > 0 ? Math.round(total / inputs.length) : 0;
+            resp.essayScore = avgEssay;
+            resp.essayScoresDetail = scoresDetail;
+
+            saveState();
+            closeGradeEssayModal();
+            renderResponsesTable();
+            showToast('Skor Disimpan', 'Pemeriksaan essay berhasil disimpan.', 'success');
+        }
+
+        function deleteResponseItem(respIdx) {
+            openModal("Hapus Jawaban", "Apakah Anda yakin ingin menghapus respon jawaban siswa ini? (Gunakan jika ada lebih dari 2 kali pengisian ganda)", () => {
+                const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+                testData.responses.splice(respIdx, 1);
+                saveState();
+                renderResponsesTable();
+                showToast('Terhapus', 'Respon siswa berhasil dihapus.', 'info');
+            });
+        }
+
+        // SINGLE TEST ANALYSIS CHART & NARRATIVE
+        function renderSingleTestAnalysis() {
+            const testData = appData.classes[currentSelectedClass][currentSelectedTest];
+            const responses = testData.responses || [];
+
+            let totalPG = 0;
+            let totalEssay = 0;
+            let essayCount = 0;
+
+            const labels = [];
+            const pgScores = [];
+            const essayScores = [];
+
+            responses.forEach((r, idx) => {
+                labels.push(r.studentName || `Siswa ${idx+1}`);
+                pgScores.push(r.pgScore || 0);
+                totalPG += (r.pgScore || 0);
+
+                if(r.essayScore !== undefined) {
+                    essayScores.push(r.essayScore);
+                    totalEssay += r.essayScore;
+                    essayCount++;
+                } else {
+                    essayScores.push(0);
+                }
+            });
+
+            const avgPG = responses.length > 0 ? Math.round(totalPG / responses.length) : 0;
+            const avgEssay = essayCount > 0 ? Math.round(totalEssay / essayCount) : 0;
+
+            document.getElementById('avgPGScore').innerText = avgPG;
+            document.getElementById('avgEssayScore').innerText = avgEssay;
+
+            // Render Chart Single Line
+            const ctx = document.getElementById('chartSingleTest').getContext('2d');
+            if(chartSingleObj) chartSingleObj.destroy();
+
+            chartSingleObj = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Belum Ada Data'],
+                    datasets: [
+                        {
+                            label: 'Skor Pilihan Ganda',
+                            data: pgScores.length > 0 ? pgScores : [0],
+                            borderColor: '#38BDF8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Skor Essay',
+                            data: essayScores.length > 0 ? essayScores : [0],
+                            borderColor: '#C084FC',
+                            backgroundColor: 'rgba(192, 132, 252, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 100 } }
+                }
+            });
+
+            // Single Narrative
+            const narrative = document.getElementById('singleTestNarrative');
+            if(responses.length === 0) {
+                narrative.innerText = "Belum terdapat data respon siswa yang masuk untuk dianalisis secara deskriptif.";
+            } else {
+                const totalAvg = Math.round((avgPG + avgEssay) / 2);
+                const critLabel = calculateCriteriaLabel(totalAvg, testData.criteriaPG);
+                narrative.innerText = `Berdasarkan hasil pelaksanaan tes pada ${testData.identity.name}, diperoleh rata-rata capaian Pilihan Ganda sebesar ${avgPG} dan rata-rata Essay sebesar ${avgEssay}. Capaian keseluruhan siswa berada pada kriteria "${critLabel}" dengan total responden sebanyak ${responses.length} siswa.`;
+            }
+        }
+
+        // CLASS COMPARISON ANALYSIS (PRE VS POST)
+        function renderClassAnalysis() {
+            const classObj = appData.classes[currentSelectedClass];
+            document.getElementById('analClassName').innerText = classObj.name;
+
+            const preData = classObj.pre.responses || [];
+            const postData = classObj.post.responses || [];
+
+            const calcAvgTotal = (responses) => {
+                if(responses.length === 0) return 0;
+                let sum = 0;
+                responses.forEach(r => {
+                    const pg = r.pgScore || 0;
+                    const es = r.essayScore || 0;
+                    sum += ((pg + es) / 2);
+                });
+                return Math.round(sum / responses.length);
+            };
+
+            const preAvg = calcAvgTotal(preData);
+            const postAvg = calcAvgTotal(postData);
+
+            document.getElementById('classPreAvgVal').innerText = preAvg;
+            document.getElementById('classPostAvgVal').innerText = postAvg;
+
+            // N-Gain Calculation
+            let gain = 0;
+            if(postAvg > preAvg) {
+                gain = Math.round(((postAvg - preAvg) / (100 - preAvg)) * 100);
+            }
+            document.getElementById('classGainVal').innerText = (gain > 0 ? `+${gain}%` : `${gain}%`);
+
+            // Chart Render
+            const ctx = document.getElementById('chartPrePostCompare').getContext('2d');
+            if(chartCompareObj) chartCompareObj.destroy();
+
+            chartCompareObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pre-Test', 'Post-Test'],
+                    datasets: [{
+                        label: 'Rata-rata Nilai Evaluasi',
+                        data: [preAvg, postAvg],
+                        backgroundColor: ['#38BDF8', '#9333EA'],
+                        borderRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 100 } }
+                }
+            });
+
+            // Narrative Text
+            const narr = document.getElementById('classNarrativeAnalysis');
+            narr.innerText = `Hasil evaluasi ${classObj.name} menunjukkan rata-rata nilai awal (Pre-Test) sebesar ${preAvg} dan mengalami ${postAvg >= preAvg ? 'peningkatan' : 'perubahan'} menjadi ${postAvg} pada evaluasi akhir (Post-Test). Indeks peningkatannya adalah sebesar ${gain}%, yang mencerminkan efektivitas instrumen pembelajaran di kelas ini.`;
+        }
+
+        // FINAL COMPARATIVE ANALYSIS (EXPERIMENT VS CONTROL)
+        function openFinalAnalysis() {
+            navTo('finalAnalysis');
+
+            const expPre = calcClassTestAvg('experiment', 'pre');
+            const expPost = calcClassTestAvg('experiment', 'post');
+            const ctrlPre = calcClassTestAvg('control', 'pre');
+            const ctrlPost = calcClassTestAvg('control', 'post');
+
+            const expGain = (expPost > expPre) ? Math.round(((expPost - expPre) / (100 - expPre)) * 100) : 0;
+            const ctrlGain = (ctrlPost > ctrlPre) ? Math.round(((ctrlPost - ctrlPre) / (100 - ctrlPre)) * 100) : 0;
+
+            document.getElementById('finalExpGain').innerText = `+${expGain}%`;
+            document.getElementById('finalCtrlGain').innerText = `+${ctrlGain}%`;
+
+            // Final Chart Line Comparison
+            const ctx = document.getElementById('chartFinalCompare').getContext('2d');
+            if(chartFinalObj) chartFinalObj.destroy();
+
+            chartFinalObj = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Pre-Test', 'Post-Test'],
+                    datasets: [
+                        {
+                            label: 'Kelas Eksperimen',
+                            data: [expPre, expPost],
+                            borderColor: '#0284C7',
+                            backgroundColor: '#0284C7',
+                            borderWidth: 3,
+                            tension: 0.2
+                        },
+                        {
+                            label: 'Kelas Kontrol',
+                            data: [ctrlPre, ctrlPost],
+                            borderColor: '#9333EA',
+                            backgroundColor: '#9333EA',
+                            borderWidth: 3,
+                            tension: 0.2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 100 } }
+                }
+            });
+
+            // Final Narrative Analysis
+            const textEl = document.getElementById('finalAnalysisText');
+            let compareText = "";
+            if(expGain > ctrlGain) {
+                compareText = "Peningkatan hasil belajar pada Kelas Eksperimen secara signifikan lebih tinggi dibandingkan Kelas Kontrol.";
+            } else if(expGain < ctrlGain) {
+                compareText = "Kelas Kontrol menunjukkan peningkatan yang lebih tinggi dibandingkan Kelas Eksperimen.";
+            } else {
+                compareText = "Kedua kelas menunjukkan tingkat peningkatan perolehan rata-rata nilai yang seimbang.";
+            }
+
+            textEl.innerText = `Berdasarkan analisis perbandingan komprehensif, Kelas Eksperimen memiliki rata-rata Pre-Test ${expPre} dan Post-Test ${expPost} (N-Gain: ${expGain}%). Sementara itu, Kelas Kontrol memiliki rata-rata Pre-Test ${ctrlPre} dan Post-Test ${ctrlPost} (N-Gain: ${ctrlGain}%). ${compareText} Temuan ini menunjukkan efektivitas dari perlakuan instrumen penelitian yang diterapkan.`;
+        }
+
+        function calcClassTestAvg(classKey, testKey) {
+            const responses = appData.classes[classKey][testKey].responses || [];
+            if(responses.length === 0) return 0;
+            let sum = 0;
+            responses.forEach(r => {
+                const pg = r.pgScore || 0;
+                const es = r.essayScore || 0;
+                sum += ((pg + es) / 2);
+            });
+            return Math.round(sum / responses.length);
+        }
+
+        // STUDENT / RESPONDENT EXAM LOGIC & FULLSCREEN LOCKDOWN
+        function checkStudentCodeHint() {
+            const inputCode = document.getElementById('stdCode').value.trim().toUpperCase();
+            const box = document.getElementById('stdInstructionsBox');
+            const text = document.getElementById('stdInstructionsText');
+
+            let foundTest = null;
+            ['experiment', 'control'].forEach(cKey => {
+                ['pre', 'post'].forEach(tKey => {
+                    const test = appData.classes[cKey][tKey];
+                    if(test.identity.code && test.identity.code.toUpperCase() === inputCode) {
+                        foundTest = test;
+                    }
+                });
+            });
+
+            if(foundTest && foundTest.identity.instructions) {
+                text.innerText = foundTest.identity.instructions;
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        function startStudentExam() {
+            const name = document.getElementById('stdName').value.trim();
+            const stdClass = document.getElementById('stdClass').value.trim();
+            const code = document.getElementById('stdCode').value.trim().toUpperCase();
+
+            let targetClassKey = null;
+            let targetTestKey = null;
+            let foundTest = null;
+
+            ['experiment', 'control'].forEach(cKey => {
+                ['pre', 'post'].forEach(tKey => {
+                    const test = appData.classes[cKey][tKey];
+                    if(test.identity.code && test.identity.code.toUpperCase() === code) {
+                        targetClassKey = cKey;
+                        targetTestKey = tKey;
+                        foundTest = test;
+                    }
+                });
+            });
+
+            if(!foundTest) {
+                showToast('Kode Soal Tidak Ditemukan', 'Mohon periksa kembali kode soal yang diberikan oleh admin.', 'error');
+                return;
+            }
+
+            if(foundTest.questionsPG.length === 0 && foundTest.questionsEssay.length === 0) {
+                showToast('Soal Belum Tersedia', 'Admin belum memasukkan soal ke dalam kode instrumen ini.', 'info');
+                return;
+            }
+
+            // Init student active exam state
+            activeStudentExam = {
+                name,
+                class: stdClass,
+                code,
+                targetClassKey,
+                targetTestKey,
+                answersPG: {},
+                answersEssay: {}
+            };
+
+            // Set Header info
+            document.getElementById('examHeaderTitle').innerText = foundTest.identity.name || "Tes Evaluasi";
+            document.getElementById('examStdName').innerText = name;
+            document.getElementById('examStdClass').innerText = stdClass;
+
+            // Render Questions
+            renderStudentExamQuestions(foundTest);
+
+            // Enable Strict Fullscreen & Anti-Cheating Lockdown
+            requestFullscreenLock();
+
+            // Navigate to Exam View
+            navTo('studentExam');
+            showExamPage('pg');
+        }
+
+        function requestFullscreenLock() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+
+            // Add anti-cheating tab blur detection
+            window.onblur = function() {
+                if(currentView === 'studentExam') {
+                    showToast('Peringatan Kecurangan!', 'Dilarang berpindah tab atau keluar layar selama ujian berlangsung!', 'error');
+                }
+            };
+        }
+
+        function showExamPage(page) {
+            const pagePG = document.getElementById('examPagePG');
+            const pageEssay = document.getElementById('examPageEssay');
+            const pageBadge = document.getElementById('examPageBadge');
+
+            if(page === 'pg') {
+                pagePG.classList.remove('hidden');
+                pageEssay.classList.add('hidden');
+                pageBadge.innerText = "Bagian 1: Pilihan Ganda";
+            } else {
+                pagePG.classList.add('hidden');
+                pageEssay.classList.remove('hidden');
+                pageBadge.innerText = "Bagian 2: Soal Uraian / Essay";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderStudentExamQuestions(testObj) {
+            // Render PG
+            const pgList = document.getElementById('examPGList');
+            pgList.innerHTML = '';
+            
+            testObj.questionsPG.forEach((q, qIdx) => {
+                const card = document.createElement('div');
+                card.className = "p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3";
+                card.innerHTML = `
+                    <p class="font-bold text-slate-800 text-sm">${qIdx + 1}. ${q.text}</p>
+                    ${q.image ? `<img src="${q.image}" class="max-h-48 rounded-xl border">` : ''}
+                    <div class="space-y-2 pt-2">
+                        ${['A','B','C','D','E'].map(optKey => {
+                            if(!q.options[optKey]) return '';
+                            return `
+                                <label class="flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-purple-300 rounded-xl cursor-pointer transition">
+                                    <input type="radio" name="std_pg_${qIdx}" value="${optKey}" onchange="saveStudentPGAnswer(${qIdx}, '${optKey}')" class="w-4 h-4 text-purple-600 focus:ring-purple-400">
+                                    <span class="text-xs font-semibold text-slate-700"><b>${optKey}.</b> ${q.options[optKey]}</span>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                pgList.appendChild(card);
+            });
+
+            // Render Essay
+            const essayList = document.getElementById('examEssayList');
+            essayList.innerHTML = '';
+
+            testObj.questionsEssay.forEach((q, qIdx) => {
+                const card = document.createElement('div');
+                card.className = "p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3";
+                card.innerHTML = `
+                    <p class="font-bold text-slate-800 text-sm">${qIdx + 1}. ${q.text}</p>
+                    ${q.image ? `<img src="${q.image}" class="max-h-48 rounded-xl border">` : ''}
+                    <div>
+                        <textarea rows="4" oninput="saveStudentEssayAnswer(${qIdx}, this.value)" placeholder="Tuliskan jawaban lengkap Anda di sini..." class="w-full p-3.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"></textarea>
+                    </div>
+                `;
+                essayList.appendChild(card);
+            });
+        }
+
+        function saveStudentPGAnswer(qIdx, val) {
+            activeStudentExam.answersPG[qIdx] = val;
+        }
+
+        function saveStudentEssayAnswer(qIdx, val) {
+            activeStudentExam.answersEssay[qIdx] = val;
+        }
+
+        function goToExamEssayPage() {
+            const testObj = appData.classes[activeStudentExam.targetClassKey][activeStudentExam.targetTestKey];
+            const pgQuestions = testObj.questionsPG || [];
+            
+            // Cek nomor PG mana yang belum diisi siswa
+            const unansPG = [];
+            pgQuestions.forEach((q, idx) => {
+                if (!activeStudentExam.answersPG[idx]) {
+                    unansPG.push(idx + 1);
+                }
+            });
+
+            if(unansPG.length > 0) {
+                showToast('Belum Lengkap', `Silakan jawab Soal PG No: ${unansPG.join(', ')} terlebih dahulu!`, 'error');
+                return;
+            }
+
+            showExamPage('essay');
+        }
+
+        function submitExamWithConfirmation() {
+            const testObj = appData.classes[activeStudentExam.targetClassKey][activeStudentExam.targetTestKey];
+            const essayQuestions = testObj.questionsEssay || [];
+            
+            // Cek nomor Essay mana yang belum diisi siswa
+            const unansEssay = [];
+            essayQuestions.forEach((q, idx) => {
+                const ans = activeStudentExam.answersEssay[idx];
+                if(!ans || ans.trim() === '') {
+                    unansEssay.push(idx + 1);
+                }
+            });
+
+            if(unansEssay.length > 0) {
+                showToast('Belum Lengkap', `Silakan isi Soal Essay No: ${unansEssay.join(', ')} sebelum mengirim!`, 'error');
+                return;
+            }
+
+            openModal(
+                "Konfirmasi Kirim Jawaban",
+                "Apakah Anda yakin semua jawaban sudah terisi dengan benar dan siap untuk dikirim?",
+                () => {
+                    finalizeExamSubmission();
+                }
+            );
+        }
+
+        function finalizeExamSubmission() {
+            const testObj = appData.classes[activeStudentExam.targetClassKey][activeStudentExam.targetTestKey];
+            
+            // Calculate PG Score Automatically
+            let correctPG = 0;
+            const totalPGQuestions = (testObj.questionsPG || []).length;
+
+            if (totalPGQuestions > 0) {
+                testObj.questionsPG.forEach((q, idx) => {
+                    if(activeStudentExam.answersPG[idx] === q.key) {
+                        correctPG++;
+                    }
+                });
+            }
+
+            const pgScore = totalPGQuestions > 0 ? Math.round((correctPG / totalPGQuestions) * 100) : 100;
+
+            const newResponse = {
+                studentName: activeStudentExam.name,
+                studentClass: activeStudentExam.class,
+                pgScore: pgScore,
+                answersPG: activeStudentExam.answersPG,
+                answersEssay: activeStudentExam.answersEssay,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Store in Local Application Data
+            if(!testObj.responses) testObj.responses = [];
+            testObj.responses.push(newResponse);
+            saveState();
+
+            // WEBHOOK SLIP INTEGRATION TO GOOGLE SHEETS
+            sendDataToGoogleSheet({
+                nama: activeStudentExam.name,
+                kelas: activeStudentExam.class,
+                kodeSoal: activeStudentExam.code,
+                skorPG: pgScore,
+                jawabanPG: JSON.stringify(activeStudentExam.answersPG),
+                jawabanEssay: JSON.stringify(activeStudentExam.answersEssay),
+                tanggal: new Date().toLocaleString()
+            });
+
+            // Exit Fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+
+            showToast('Berhasil Terkirim', 'Jawaban Anda telah sukses disimpan dan terkirim!', 'success');
+            
+            // Return to home after delay
+            setTimeout(() => {
+                navTo('home');
+            }, 1500);
+        }
+
+        // FETCH WEBHOOK POST TO GOOGLE APPS SCRIPT
+        function sendDataToGoogleSheet(payload) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // handle CORS requirement for GAS WebApp
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log('Terkirim ke Google Sheets');
+            }).catch(err => {
+                console.warn('Gagal terkirim ke Google Sheets, tersimpan di LocalStorage:', err);
+            });
+        }
+    </script>
+</body>
+</html>
